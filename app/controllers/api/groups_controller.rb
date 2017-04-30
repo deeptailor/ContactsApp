@@ -1,7 +1,7 @@
 class Api::GroupsController < ApplicationController
 
   def index
-    @groups = Group.all
+    @groups = Group.includes(:contacts);
   end
 
   def show

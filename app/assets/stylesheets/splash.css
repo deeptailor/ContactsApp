@@ -1,0 +1,13 @@
+.splash-container{
+  height: 80vh;
+  width: 100%;
+  background: #f7f7f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.splash-container > h1{
+  font-size: 40px;
+  color: #3b5998;
+}
