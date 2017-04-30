@@ -4,16 +4,22 @@ import ContactCard from './contact_card.jsx';
 class Contacts extends React.Component{
   constructor(props){
     super(props)
+    this.state = {renderForm: false, firstname:undefined, lastname:undefined,profile_image_url:undefined,number:undefined,error:undefined};
+    this.setForm = this.setForm.bind(this);
+    this.setContacts = this.setContacts.bind(this);
+    this.routerPush = this.routerPush.bind(this);
+    this.update = this.update.bind(this);
+    this.submit = this.submit.bind(this);
   }
 
   componentWillMount(){
     this.props.fetchContacts();
-    this.state = {renderForm: false, firstname:undefined, lastname:undefined,profile_image_url:undefined,number:undefined,error:undefined};
+  }
 
-    this.setForm = this.setForm.bind(this);
-    this.setContacts = this.setContacts.bind(this);
-    this.update = this.update.bind(this);
-    this.submit = this.submit.bind(this);
+  componentWillReceiveProps(newProps){
+    if(this.props.contacts.length !== newProps.contacts.length){
+      this.setState({renderForm: false, firstname:undefined, lastname:undefined,profile_image_url:undefined,number:undefined,error:undefined});
+    }
   }
 
   setForm(){
@@ -22,6 +28,10 @@ class Contacts extends React.Component{
 
   setContacts(){
     this.setState({renderForm: false});
+  }
+
+  routerPush(url){
+    this.props.router.push(url);
   }
 
   update(field){
@@ -35,7 +45,12 @@ class Contacts extends React.Component{
     if(this.state.firstname === undefined || this.state.lastname === undefined|| this.state.number === undefined){
       this.setState({error: 'Please Enter All Fields Marked with *'})
     } else {
-      
+      this.props.addContact({
+        firstname: this.state.firstname,
+        lastname: this.state.lastname,
+        profile_image_url: this.state.profile_image_url,
+        number: Number(this.state.number)
+      });
     }
   }
 
@@ -43,7 +58,7 @@ class Contacts extends React.Component{
     if(this.props.contacts.length > 0){
       return(
         this.props.contacts.map((contact,i) => { return(
-          <ContactCard key={`contact-${i}`}contact={contact} contactId={contact.id}/>
+          <ContactCard key={`contact-${i}`}contact={contact} contactId={contact.id} deleteContact={this.props.deleteContact}/>
         )})
       )
     } else {

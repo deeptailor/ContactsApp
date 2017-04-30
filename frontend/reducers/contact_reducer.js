@@ -10,7 +10,7 @@ const ContactReducer = (state = _nullContacts, action) => {
   switch(action.type){
 
     case RECEIVE_CONTACTS:
-      newState = merge(newState, action.contacts);
+      newState = action.contacts;
       return newState;
 
     default:

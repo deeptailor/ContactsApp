@@ -6,3 +6,22 @@ export const requestContacts = (success, error) => {
     error: error
   })
 };
+
+export const addContact = (data, success, error) => {
+  $.ajax({
+    method: 'post',
+    url: 'api/contacts',
+    data: {contact: data},
+    success: success,
+    error: error
+  })
+};
+
+export const deleteContactRequest = (id, success, error) => {
+  $.ajax({
+    method: 'delete',
+    url: `api/contacts/${id}`,
+    success: success,
+    error: error
+  })
+};

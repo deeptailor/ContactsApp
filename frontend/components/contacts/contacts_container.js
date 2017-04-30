@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import Contacts from './contacts.jsx';
 
-import { fetchContacts } from '../../actions/contact_actions.js';
+import { fetchContacts, createContact, deleteContact } from '../../actions/contact_actions.js';
 
 const mapStateToProps = ({ contacts }) => {
   return({
@@ -11,7 +11,9 @@ const mapStateToProps = ({ contacts }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return ({
-    fetchContacts: () => (dispatch(fetchContacts))
+    fetchContacts: () => (dispatch(fetchContacts)),
+    addContact: (data) => (dispatch(createContact(data))),
+    deleteContact: (id) => (dispatch(deleteContact(id)))
   });
 }
 

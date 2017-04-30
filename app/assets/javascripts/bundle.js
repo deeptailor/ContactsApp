@@ -22545,6 +22545,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 var FETCH_CONTACTS = exports.FETCH_CONTACTS = 'FETCH_CONTACTS';
 var RECEIVE_CONTACTS = exports.RECEIVE_CONTACTS = 'RECEIVE_CONTACTS';
+var CREATE_CONTACT = exports.CREATE_CONTACT = 'CREATE_CONTACT';
+var DELETE_CONTACT = exports.DELETE_CONTACT = 'DELETE_CONTACT';
 
 var fetchContacts = exports.fetchContacts = {
   type: FETCH_CONTACTS
@@ -22554,6 +22556,20 @@ var receiveContacts = exports.receiveContacts = function receiveContacts(contact
   return {
     type: RECEIVE_CONTACTS,
     contacts: contacts
+  };
+};
+
+var createContact = exports.createContact = function createContact(data) {
+  return {
+    type: CREATE_CONTACT,
+    data: data
+  };
+};
+
+var deleteContact = exports.deleteContact = function deleteContact(id) {
+  return {
+    type: DELETE_CONTACT,
+    id: id
   };
 };
 
@@ -23473,12 +23489,20 @@ var ContactMiddleware = function ContactMiddleware(_ref) {
         return dispatch((0, _contact_actions.receiveContacts)(contacts));
       };
       var receiveContactsErrorCB = function receiveContactsErrorCB(error) {
-        return console.lot(error);
+        return console.log(error);
       };
       switch (action.type) {
 
         case _contact_actions.FETCH_CONTACTS:
           (0, _contact_api_util.requestContacts)(receiveContactsSuccessCB, receiveContactsErrorCB);
+          return next(action);
+
+        case _contact_actions.CREATE_CONTACT:
+          (0, _contact_api_util.addContact)(action.data, receiveContactsSuccessCB, receiveContactsErrorCB);
+          return next(action);
+
+        case _contact_actions.DELETE_CONTACT:
+          (0, _contact_api_util.deleteContactRequest)(action.id, receiveContactsSuccessCB, receiveContactsErrorCB);
           return next(action);
 
         default:
@@ -23590,7 +23614,7 @@ var ContactReducer = function ContactReducer() {
   switch (action.type) {
 
     case _contact_actions.RECEIVE_CONTACTS:
-      newState = (0, _merge2.default)(newState, action.contacts);
+      newState = action.contacts;
       return newState;
 
     default:
@@ -23687,6 +23711,25 @@ var requestContacts = exports.requestContacts = function requestContacts(success
   $.ajax({
     method: 'get',
     url: 'api/contacts',
+    success: success,
+    error: error
+  });
+};
+
+var addContact = exports.addContact = function addContact(data, success, error) {
+  $.ajax({
+    method: 'post',
+    url: 'api/contacts',
+    data: { contact: data },
+    success: success,
+    error: error
+  });
+};
+
+var deleteContactRequest = exports.deleteContactRequest = function deleteContactRequest(id, success, error) {
+  $.ajax({
+    method: 'delete',
+    url: 'api/contacts/' + id,
     success: success,
     error: error
   });
@@ -33285,6 +33328,12 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return {
     fetchContacts: function fetchContacts() {
       return dispatch(_contact_actions.fetchContacts);
+    },
+    addContact: function addContact(data) {
+      return dispatch((0, _contact_actions.createContact)(data));
+    },
+    deleteContact: function deleteContact(id) {
+      return dispatch((0, _contact_actions.deleteContact)(id));
     }
   };
 };
@@ -33328,19 +33377,28 @@ var Contacts = function (_React$Component) {
   function Contacts(props) {
     _classCallCheck(this, Contacts);
 
-    return _possibleConstructorReturn(this, (Contacts.__proto__ || Object.getPrototypeOf(Contacts)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (Contacts.__proto__ || Object.getPrototypeOf(Contacts)).call(this, props));
+
+    _this.state = { renderForm: false, firstname: undefined, lastname: undefined, profile_image_url: undefined, number: undefined, error: undefined };
+    _this.setForm = _this.setForm.bind(_this);
+    _this.setContacts = _this.setContacts.bind(_this);
+    _this.routerPush = _this.routerPush.bind(_this);
+    _this.update = _this.update.bind(_this);
+    _this.submit = _this.submit.bind(_this);
+    return _this;
   }
 
   _createClass(Contacts, [{
     key: 'componentWillMount',
     value: function componentWillMount() {
       this.props.fetchContacts();
-      this.state = { renderForm: false, firstname: undefined, lastname: undefined, profile_image_url: undefined, number: undefined, error: undefined };
-
-      this.setForm = this.setForm.bind(this);
-      this.setContacts = this.setContacts.bind(this);
-      this.update = this.update.bind(this);
-      this.submit = this.submit.bind(this);
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(newProps) {
+      if (this.props.contacts.length !== newProps.contacts.length) {
+        this.setState({ renderForm: false, firstname: undefined, lastname: undefined, profile_image_url: undefined, number: undefined, error: undefined });
+      }
     }
   }, {
     key: 'setForm',
@@ -33351,6 +33409,11 @@ var Contacts = function (_React$Component) {
     key: 'setContacts',
     value: function setContacts() {
       this.setState({ renderForm: false });
+    }
+  }, {
+    key: 'routerPush',
+    value: function routerPush(url) {
+      this.props.router.push(url);
     }
   }, {
     key: 'update',
@@ -33368,14 +33431,23 @@ var Contacts = function (_React$Component) {
     value: function submit() {
       if (this.state.firstname === undefined || this.state.lastname === undefined || this.state.number === undefined) {
         this.setState({ error: 'Please Enter All Fields Marked with *' });
-      } else {}
+      } else {
+        this.props.addContact({
+          firstname: this.state.firstname,
+          lastname: this.state.lastname,
+          profile_image_url: this.state.profile_image_url,
+          number: Number(this.state.number)
+        });
+      }
     }
   }, {
     key: 'renderContacts',
     value: function renderContacts() {
+      var _this3 = this;
+
       if (this.props.contacts.length > 0) {
         return this.props.contacts.map(function (contact, i) {
-          return _react2.default.createElement(_contact_card2.default, { key: 'contact-' + i, contact: contact, contactId: contact.id });
+          return _react2.default.createElement(_contact_card2.default, { key: 'contact-' + i, contact: contact, contactId: contact.id, deleteContact: _this3.props.deleteContact });
         });
       } else {
         return _react2.default.createElement(
@@ -33479,6 +33551,12 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function numberFormat(number) {
+  var numString = number + '';
+
+  return '(' + numString.slice(0, 3) + ') ' + numString.slice(3, 6) + '-' + numString.slice(6);
+}
+
 var ContactCard = function (_React$Component) {
   _inherits(ContactCard, _React$Component);
 
@@ -33489,48 +33567,57 @@ var ContactCard = function (_React$Component) {
   }
 
   _createClass(ContactCard, [{
-    key: "render",
+    key: 'delete',
+    value: function _delete(id) {
+      var _this2 = this;
+
+      return function () {
+        _this2.props.deleteContact(id);
+      };
+    }
+  }, {
+    key: 'render',
     value: function render() {
       return _react2.default.createElement(
-        "li",
+        'li',
         null,
         _react2.default.createElement(
-          "div",
-          { className: "contact-main" },
+          'div',
+          { className: 'contact-main' },
           _react2.default.createElement(
-            "div",
-            { className: "contact-main-left" },
-            _react2.default.createElement("img", { src: this.props.contact.profile_image_url })
+            'div',
+            { className: 'contact-main-left' },
+            _react2.default.createElement('img', { src: this.props.contact.profile_image_url })
           ),
           _react2.default.createElement(
-            "div",
-            { className: "contact-main-right" },
+            'div',
+            { className: 'contact-main-right' },
             _react2.default.createElement(
-              "h2",
+              'h2',
               null,
               this.props.contact.firstname,
-              " ",
+              ' ',
               this.props.contact.lastname
             ),
             _react2.default.createElement(
-              "h3",
+              'h3',
               null,
-              "Number: ",
-              this.props.contact.number
+              'Number: ',
+              numberFormat(this.props.contact.number)
             )
           ),
           _react2.default.createElement(
-            "div",
-            { className: "contact-actions" },
+            'div',
+            { className: 'contact-actions' },
             _react2.default.createElement(
-              "div",
-              { className: "contact-actions-edit" },
-              _react2.default.createElement("i", { className: "fa fa-pencil-square", "aria-hidden": "true" })
+              'div',
+              { className: 'contact-actions-edit' },
+              _react2.default.createElement('i', { className: 'fa fa-pencil-square', 'aria-hidden': 'true' })
             ),
             _react2.default.createElement(
-              "div",
-              { className: "contact-actions-delete" },
-              _react2.default.createElement("i", { className: "fa fa-trash", "aria-hidden": "true" })
+              'div',
+              { className: 'contact-actions-delete', onClick: this.delete(this.props.contactId) },
+              _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' })
             )
           )
         )
