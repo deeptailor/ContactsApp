@@ -22321,6 +22321,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 var FETCH_GROUPS = exports.FETCH_GROUPS = 'FETCH_GROUPS';
 var RECEIVE_GROUPS = exports.RECEIVE_GROUPS = 'RECEIVE_GROUPS';
+var CREATE_GROUP = exports.CREATE_GROUP = 'CREATE_GROUP';
+var DELETE_GROUP = exports.DELETE_GROUP = 'DELETE_GROUP';
 
 var fetchGroups = exports.fetchGroups = {
   type: FETCH_GROUPS
@@ -22330,6 +22332,20 @@ var receiveGroups = exports.receiveGroups = function receiveGroups(groups) {
   return {
     type: RECEIVE_GROUPS,
     groups: groups
+  };
+};
+
+var createGroup = exports.createGroup = function createGroup(data) {
+  return {
+    type: CREATE_GROUP,
+    data: data
+  };
+};
+
+var deleteGroup = exports.deleteGroup = function deleteGroup(id) {
+  return {
+    type: DELETE_GROUP,
+    id: id
   };
 };
 
@@ -23539,12 +23555,20 @@ var GroupMiddleware = function GroupMiddleware(_ref) {
         return dispatch((0, _group_actions.receiveGroups)(groups));
       };
       var receiveGroupsErrorCB = function receiveGroupsErrorCB(error) {
-        return console.lot(error);
+        return console.log(error);
       };
       switch (action.type) {
 
         case _group_actions.FETCH_GROUPS:
           (0, _group_api_util.requestGroups)(receiveGroupsSuccessCB, receiveGroupsErrorCB);
+          return next(action);
+
+        case _group_actions.CREATE_GROUP:
+          (0, _group_api_util.createGroupRequest)(action.data, receiveGroupsSuccessCB, receiveGroupsErrorCB);
+          return next(action);
+
+        case _group_actions.DELETE_GROUP:
+          (0, _group_api_util.deleteGroupRequest)(action.id, receiveGroupsSuccessCB, receiveGroupsErrorCB);
           return next(action);
 
         default:
@@ -23656,7 +23680,7 @@ var GroupReducer = function GroupReducer() {
   switch (action.type) {
 
     case _group_actions.RECEIVE_GROUPS:
-      newState = (0, _merge2.default)(newState, action.groups);
+      newState = action.groups;
       return newState;
 
     default:
@@ -23749,6 +23773,25 @@ var requestGroups = exports.requestGroups = function requestGroups(success, erro
   $.ajax({
     method: 'get',
     url: 'api/groups',
+    success: success,
+    error: error
+  });
+};
+
+var createGroupRequest = exports.createGroupRequest = function createGroupRequest(data, success, error) {
+  $.ajax({
+    method: 'post',
+    url: 'api/groups',
+    data: { group: data },
+    success: success,
+    error: error
+  });
+};
+
+var deleteGroupRequest = exports.deleteGroupRequest = function deleteGroupRequest(id, success, error) {
+  $.ajax({
+    method: 'delete',
+    url: 'api/groups/' + id,
     success: success,
     error: error
   });
@@ -29473,6 +29516,10 @@ var _contacts_container = __webpack_require__(387);
 
 var _contacts_container2 = _interopRequireDefault(_contacts_container);
 
+var _group_container = __webpack_require__(391);
+
+var _group_container2 = _interopRequireDefault(_group_container);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var RootComponent = function RootComponent(_ref) {
@@ -29487,7 +29534,8 @@ var RootComponent = function RootComponent(_ref) {
         _reactRouter.Route,
         { path: '/', component: _navigation2.default },
         _react2.default.createElement(_reactRouter.IndexRoute, { component: _splash2.default }),
-        _react2.default.createElement(_reactRouter.Route, { path: '/contacts', component: _contacts_container2.default })
+        _react2.default.createElement(_reactRouter.Route, { path: '/contacts', component: _contacts_container2.default }),
+        _react2.default.createElement(_reactRouter.Route, { path: '/groups', component: _group_container2.default })
       )
     )
   );
@@ -33484,7 +33532,7 @@ var Contacts = function (_React$Component) {
             _react2.default.createElement(
               'button',
               { type: 'button', onClick: this.submit },
-              'Submit'
+              'Add'
             )
           )
         );
@@ -33579,46 +33627,42 @@ var ContactCard = function (_React$Component) {
     key: 'render',
     value: function render() {
       return _react2.default.createElement(
-        'li',
-        null,
+        'div',
+        { className: 'contact-main' },
         _react2.default.createElement(
           'div',
-          { className: 'contact-main' },
+          { className: 'contact-main-left' },
+          _react2.default.createElement('img', { src: this.props.contact.profile_image_url })
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'contact-main-right' },
+          _react2.default.createElement(
+            'h2',
+            null,
+            this.props.contact.firstname,
+            ' ',
+            this.props.contact.lastname
+          ),
+          _react2.default.createElement(
+            'h3',
+            null,
+            'Number: ',
+            numberFormat(this.props.contact.number)
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'contact-actions' },
           _react2.default.createElement(
             'div',
-            { className: 'contact-main-left' },
-            _react2.default.createElement('img', { src: this.props.contact.profile_image_url })
+            { className: 'contact-actions-edit' },
+            _react2.default.createElement('i', { className: 'fa fa-pencil-square', 'aria-hidden': 'true' })
           ),
           _react2.default.createElement(
             'div',
-            { className: 'contact-main-right' },
-            _react2.default.createElement(
-              'h2',
-              null,
-              this.props.contact.firstname,
-              ' ',
-              this.props.contact.lastname
-            ),
-            _react2.default.createElement(
-              'h3',
-              null,
-              'Number: ',
-              numberFormat(this.props.contact.number)
-            )
-          ),
-          _react2.default.createElement(
-            'div',
-            { className: 'contact-actions' },
-            _react2.default.createElement(
-              'div',
-              { className: 'contact-actions-edit' },
-              _react2.default.createElement('i', { className: 'fa fa-pencil-square', 'aria-hidden': 'true' })
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'contact-actions-delete', onClick: this.delete(this.props.contactId) },
-              _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' })
-            )
+            { className: 'contact-actions-delete', onClick: this.delete(this.props.contactId) },
+            _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' })
           )
         )
       );
@@ -33629,6 +33673,371 @@ var ContactCard = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = ContactCard;
+
+/***/ }),
+/* 390 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(81);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _group_card = __webpack_require__(392);
+
+var _group_card2 = _interopRequireDefault(_group_card);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Group = function (_React$Component) {
+  _inherits(Group, _React$Component);
+
+  function Group(props) {
+    _classCallCheck(this, Group);
+
+    var _this = _possibleConstructorReturn(this, (Group.__proto__ || Object.getPrototypeOf(Group)).call(this, props));
+
+    _this.state = { renderForm: false, name: undefined, image: undefined };
+
+    _this.update = _this.update.bind(_this);
+    _this.submit = _this.submit.bind(_this);
+    _this.setGroups = _this.setGroups.bind(_this);
+    _this.setForm = _this.setForm.bind(_this);
+
+    return _this;
+  }
+
+  _createClass(Group, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      this.props.fetchGroups();
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(newProps) {
+      if (this.props.groups.length !== newProps.groups.length) {
+        this.setState({ renderForm: false, name: undefined, image: undefined });
+      }
+    }
+  }, {
+    key: 'update',
+    value: function update(field) {
+      var _this2 = this;
+
+      return function (e) {
+        _this2.setState(_defineProperty({}, field, e.currentTarget.value));
+      };
+    }
+  }, {
+    key: 'submit',
+    value: function submit() {
+      this.props.createGroup({
+        name: this.state.name,
+        image: this.state.image
+      });
+    }
+  }, {
+    key: 'setGroups',
+    value: function setGroups() {
+      this.setState({ renderForm: false });
+    }
+  }, {
+    key: 'setForm',
+    value: function setForm() {
+      this.setState({ renderForm: true });
+    }
+  }, {
+    key: 'renderGroups',
+    value: function renderGroups() {
+      var _this3 = this;
+
+      if (this.props.groups.length > 0) {
+        return this.props.groups.map(function (group, i) {
+          return _react2.default.createElement(_group_card2.default, { key: 'group-' + i, image: group.image, name: group.name, numContacts: group.contacts.length, contacts: group.contacts, deleteGroup: _this3.props.deleteGroup, id: group.id });
+        });
+      } else {
+        return _react2.default.createElement(
+          'h1',
+          null,
+          'You have no contacts'
+        );
+      }
+    }
+  }, {
+    key: 'renderMain',
+    value: function renderMain() {
+      if (this.state.renderForm) {
+        return _react2.default.createElement(
+          'div',
+          { className: 'add-contact-form-container' },
+          _react2.default.createElement(
+            'h1',
+            null,
+            'Create New Group'
+          ),
+          _react2.default.createElement(
+            'h2',
+            null,
+            this.state.error
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'add-contact-form-main' },
+            _react2.default.createElement('input', { type: 'text', value: this.state.name, onChange: this.update('name'), placeholder: 'Group Name *' }),
+            _react2.default.createElement('input', { type: 'text', value: this.state.image, onChange: this.update('image'), placeholder: 'Group Image URL' }),
+            _react2.default.createElement(
+              'button',
+              { type: 'button', onClick: this.submit },
+              'Create'
+            )
+          )
+        );
+      } else {
+        return this.renderGroups();
+      }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        { className: 'contacts-container' },
+        _react2.default.createElement(
+          'ul',
+          { className: 'contacts-menu' },
+          _react2.default.createElement(
+            'li',
+            { onClick: this.setGroups },
+            'All My Groups'
+          ),
+          _react2.default.createElement(
+            'li',
+            { onClick: this.setForm },
+            'Create New Group'
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'contacts-main' },
+          this.renderMain()
+        )
+      );
+    }
+  }]);
+
+  return Group;
+}(_react2.default.Component);
+
+exports.default = Group;
+
+/***/ }),
+/* 391 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _reactRedux = __webpack_require__(365);
+
+var _group = __webpack_require__(390);
+
+var _group2 = _interopRequireDefault(_group);
+
+var _group_actions = __webpack_require__(192);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mapStateToProps = function mapStateToProps(_ref) {
+  var groups = _ref.groups;
+
+  return {
+    groups: Object.keys(groups).map(function (key) {
+      return groups[key];
+    })
+  };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    fetchGroups: function fetchGroups() {
+      return dispatch(_group_actions.fetchGroups);
+    },
+    createGroup: function createGroup(data) {
+      return dispatch((0, _group_actions.createGroup)(data));
+    },
+    deleteGroup: function deleteGroup(id) {
+      return dispatch((0, _group_actions.deleteGroup)(id));
+    }
+  };
+};
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_group2.default);
+
+/***/ }),
+/* 392 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(81);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _contact_card = __webpack_require__(389);
+
+var _contact_card2 = _interopRequireDefault(_contact_card);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var GroupCard = function (_React$Component) {
+  _inherits(GroupCard, _React$Component);
+
+  function GroupCard(props) {
+    _classCallCheck(this, GroupCard);
+
+    var _this = _possibleConstructorReturn(this, (GroupCard.__proto__ || Object.getPrototypeOf(GroupCard)).call(this, props));
+
+    _this.state = { overlay: false };
+
+    _this.showOverlay = _this.showOverlay.bind(_this);
+    _this.dontShowOverlay = _this.dontShowOverlay.bind(_this);
+    _this.delete = _this.delete.bind(_this);
+    return _this;
+  }
+
+  _createClass(GroupCard, [{
+    key: 'delete',
+    value: function _delete(id) {
+      var _this2 = this;
+
+      return function (e) {
+        e.stopPropagation();
+        _this2.props.deleteGroup(id);
+      };
+    }
+  }, {
+    key: 'showOverlay',
+    value: function showOverlay() {
+      this.setState({ overlay: true });
+    }
+  }, {
+    key: 'dontShowOverlay',
+    value: function dontShowOverlay(e) {
+      e.stopPropagation();
+      this.setState({ overlay: false });
+    }
+  }, {
+    key: 'renderContacts',
+    value: function renderContacts() {
+      if (this.props.contacts.length > 0) {
+        return this.props.contacts.map(function (contact, i) {
+          return _react2.default.createElement(_contact_card2.default, { key: 'contact-' + i, contact: contact, contactId: contact.id });
+        });
+      }
+    }
+  }, {
+    key: 'renderOverlay',
+    value: function renderOverlay() {
+      if (this.state.overlay) {
+        return _react2.default.createElement(
+          'div',
+          { className: 'group-overlay', onClick: this.dontShowOverlay },
+          _react2.default.createElement(
+            'div',
+            { className: 'group-overlay-main', onClick: function onClick(e) {
+                return e.stopPropagation();
+              } },
+            _react2.default.createElement(
+              'h1',
+              null,
+              this.props.name
+            ),
+            this.renderContacts()
+          )
+        );
+      }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        { className: 'contact-main', onClick: this.showOverlay },
+        _react2.default.createElement(
+          'div',
+          { className: 'contact-main-left' },
+          _react2.default.createElement('img', { src: this.props.image })
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'contact-main-right' },
+          _react2.default.createElement(
+            'h2',
+            null,
+            this.props.name
+          ),
+          _react2.default.createElement(
+            'h3',
+            null,
+            'This group has ' + this.props.numContacts + ' contacts'
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'contact-actions' },
+          _react2.default.createElement(
+            'div',
+            { className: 'contact-actions-edit' },
+            _react2.default.createElement('i', { className: 'fa fa-pencil-square', 'aria-hidden': 'true' })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'contact-actions-delete', onClick: this.delete(this.props.id) },
+            _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' })
+          )
+        ),
+        this.renderOverlay()
+      );
+    }
+  }]);
+
+  return GroupCard;
+}(_react2.default.Component);
+
+exports.default = GroupCard;
 
 /***/ })
 /******/ ]);

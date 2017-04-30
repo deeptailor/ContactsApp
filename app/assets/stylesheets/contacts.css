@@ -27,6 +27,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 70%;
+  list-style: none;
+  background: #dfe3ee;
+  border-radius: 10px;
+  margin: 20px 0;
+  min-height: 100px;
 }
 
 .contact-main:hover > .contact-actions{

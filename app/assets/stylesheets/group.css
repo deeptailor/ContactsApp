@@ -1,0 +1,27 @@
+.group-overlay{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.group-overlay-main{
+  background: white;
+  width: 80%;
+  height: 90%;
+  overflow: scroll;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.group-overlay-main > h1 {
+  margin: 20px;
+  font-size: 28px;
+}

@@ -79,7 +79,7 @@ class Contacts extends React.Component{
             <input type="text" value={this.state.lastname} onChange={this.update('lastname')} placeholder="Last Name *"></input>
             <input type="tel" value={this.state.number} onChange={this.update('number')} placeholder="Phone Number *"></input>
             <input type="url" value={this.state.profile_image_url} onChange={this.update('profile_image_url')} placeholder="Image URL"></input>
-            <button type="button" onClick={this.submit}>Submit</button>
+            <button type="button" onClick={this.submit}>Add</button>
           </div>
         </div>
       )
