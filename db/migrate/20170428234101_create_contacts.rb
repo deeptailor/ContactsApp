@@ -4,7 +4,7 @@ class CreateContacts < ActiveRecord::Migration[5.0]
       t.string :firstname, null:false
       t.string :lastname
       t.string :profile_image_url
-      t.integer :number, null:false
+      t.string :number, null:false
       t.timestamps
     end
     add_index :contacts, :firstname, unique:true

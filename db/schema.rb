@@ -19,7 +19,7 @@ ActiveRecord::Schema.define(version: 20170428235424) do
     t.string   "firstname",         null: false
     t.string   "lastname"
     t.string   "profile_image_url"
-    t.integer  "number",            null: false
+    t.string   "number",            null: false
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
     t.index ["firstname"], name: "index_contacts_on_firstname", unique: true, using: :btree

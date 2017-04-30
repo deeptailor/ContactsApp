@@ -8,10 +8,10 @@
 
 
 Contact.create(
-  {firstname: 'Deep', lastname: 'Tailor', number: 123456789, profile_image_url: 'https://res.cloudinary.com/deeptailor/image/upload/v1486414290/Deep_Tailor-picture-cropped_mt6xp3.jpg'}
+  {firstname: 'Deep', lastname: 'Tailor', number: '1234567890', profile_image_url: 'https://res.cloudinary.com/deeptailor/image/upload/v1486414290/Deep_Tailor-picture-cropped_mt6xp3.jpg'}
 )
 Contact.create(
-  {firstname: 'Chok', lastname: 'Lam', number: 123456789, profile_image_url: 'https://res.cloudinary.com/deeptailor/image/upload/v1493424462/chok_sppn7z.jpg'}
+  {firstname: 'Chok', lastname: 'Lam', number: '1234567890', profile_image_url: 'https://res.cloudinary.com/deeptailor/image/upload/v1493424462/chok_sppn7z.jpg'}
 )
 
 
